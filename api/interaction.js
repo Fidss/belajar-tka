@@ -7,9 +7,11 @@ import {
 
 /*
 =====================================
-ISI CONFIG DI SINI (TANPA ENV)
+CONFIG (TANPA ENV)
+⚠️ TOKEN JANGAN DISEBAR
 =====================================
 */
+
 const CONFIG = {
   DISCORD_PUBLIC_KEY: "11434966887f9540aa05888bafc40a1c6ec881ba15c312487adaf3f1f5863197",
   DISCORD_BOT_TOKEN: "MTQ3MDM1NDMyMzIxMTgxNzEwNQ.GgMyCT.Ft3DR12UDYQzhwZExUB00pyd7TpXJ91wPN1vCs",
@@ -36,18 +38,23 @@ export default async function handler(req, res) {
 
   const interaction = req.body;
 
-  // Ping dari Discord
+  /* =====================
+     PING (WAJIB)
+  ====================== */
   if (interaction.type === InteractionType.PING) {
     return res.json({ type: InteractionResponseType.PONG });
   }
 
-  // Slash command /start
+  /* =====================
+     SLASH COMMAND /start
+  ====================== */
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     if (interaction.data.name === "start") {
       return res.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: "📚 **Panel Belajar TKA**\nKlik tombol untuk mulai timer 20 menit",
+          content:
+            "📚 **Panel Belajar TKA**\nKlik tombol di bawah untuk mulai belajar 20 menit",
           components: [
             {
               type: 1,
@@ -66,31 +73,43 @@ export default async function handler(req, res) {
     }
   }
 
-  // Button click
+  /* =====================
+     BUTTON CLICK
+  ====================== */
   if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
     if (interaction.data.custom_id === "mulai_tka") {
 
-      // Response cepat (< 3 detik)
+      // 1️⃣ BALAS LANGSUNG (ONLY YOU)
       res.json({
-        type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { flags: 64 }
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content:
+            "⏳ **Timer dimulai!**\nFokus belajar TKA selama 20 menit 💪\n\n_Notifikasi selesai akan dikirim ke #tka-log_",
+          flags: 64 // EPHEMERAL
+        }
       });
 
-      // Timer 20 menit
+      // 2️⃣ TIMER 20 MENIT
       setTimeout(async () => {
-        await fetch(
-          `https://discord.com/api/v10/channels/${CONFIG.TKA_LOG_CHANNEL_ID}/messages`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bot ${CONFIG.DISCORD_BOT_TOKEN}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              content: `✅ **TKA SELESAI**\n<@${interaction.member.user.id}> berhasil menyelesaikan 20 menit belajar 💪`
-            })
-          }
-        );
+        try {
+          await fetch(
+            `https://discord.com/api/v10/channels/${CONFIG.TKA_LOG_CHANNEL_ID}/messages`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bot ${CONFIG.DISCORD_BOT_TOKEN}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                content:
+                  `✅ **TKA SELESAI**\n` +
+                  `<@${interaction.member.user.id}> berhasil menyelesaikan **20 menit belajar** 💪🔥`
+              })
+            }
+          );
+        } catch (err) {
+          console.error("Gagal kirim log:", err);
+        }
       }, DURASI);
 
       return;
