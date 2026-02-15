@@ -1,7 +1,8 @@
 {
-  "functions": {
-    "api/interaction.js": {
-      "maxDuration": 30
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "*/1 * * * *"
     }
-  }
+  ]
 }
